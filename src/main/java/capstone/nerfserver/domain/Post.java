@@ -12,15 +12,17 @@ public class Post {
     private String content;
     private long price;
     private LocalDateTime date;
+    private Long numberOfImages;
     private String state;
 
     public Post() {
     }
-    public Post(long userId, String title, String content, long price) {
+    public Post(long userId, String title, String content, long price, long numberOfImages) {
         this.userId = userId;
         this.title = title;
         this.content = content;
         this.price = price;
+        this.numberOfImages = numberOfImages;
         this.date = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.state = "waiting";
     }
@@ -71,6 +73,14 @@ public class Post {
 
     public void updateDate(String date) {
         this.date = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    }
+
+    public Long getNumberOfImages() {
+        return numberOfImages;
+    }
+
+    public void setNumberOfImages(Long numberOfImages) {
+        this.numberOfImages = numberOfImages;
     }
 
     public String getState() {

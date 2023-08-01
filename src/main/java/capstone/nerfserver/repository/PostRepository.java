@@ -11,6 +11,7 @@ public interface PostRepository {
     Optional<Post> updateTitle(Long id, String title);
     Optional<Post> updateContent(Long id, String content);
     Optional<Post> updatePrice(Long id, Long price);
+    Optional<Post> updateNumberOfImages(Long id, Long numberOfImages);
     Optional<Post> updateState(Long id, String state);
     List<Post> findByUserId(Long userId);
     Optional<Post> findById(Long id);

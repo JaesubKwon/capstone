@@ -75,6 +75,20 @@ class MemoryPostRepositoryTest {
     }
 
     @Test
+    void updateNumberOfImages() {
+        //given
+        Post post = new Post();
+        Long id = repository.save(post).getId();
+
+        //when
+        repository.updateNumberOfImages(id, 2L);
+
+        //then
+        Long result = repository.findById(post.getId()).get().getNumberOfImages();
+        Assertions.assertThat(2L).isEqualTo(result);
+    }
+
+    @Test
     void updateState() {
         //given
         Post post = new Post();

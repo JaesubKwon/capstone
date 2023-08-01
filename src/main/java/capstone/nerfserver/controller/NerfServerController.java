@@ -28,10 +28,13 @@ public class NerfServerController {
 
     @PostMapping("upload")
     @ResponseBody
-    public Post uploadPost(@RequestParam Long userId, @RequestParam String title, @RequestParam String content, @RequestParam Long price, @RequestParam MultipartFile video) {
-        Post post = new Post(userId, title, content, price);
+    public Post uploadPost(@RequestParam Long userId, @RequestParam String title, @RequestParam String content, @RequestParam Long price, @RequestParam Long numberOfImages, @RequestParam MultipartFile video,
+            @RequestParam MultipartFile image_1, @RequestParam MultipartFile image_2, @RequestParam MultipartFile image_3, @RequestParam MultipartFile image_4, @RequestParam MultipartFile image_5) {
+        Post post = new Post(userId, title, content, price, numberOfImages);
         service.upload(post);
         service.saveVideo(post.getId(), video);
+        MultipartFile[] images = {image_1, image_2, image_3, image_4, image_5};
+        service.saveImages(post.getId(), images, numberOfImages);
         service.runNerf(post.getId());
 
         return post; //void로?
@@ -141,5 +144,47 @@ public class NerfServerController {
         }
     }
      */
+
+    @GetMapping("image")
+    @ResponseBody
+    public void getImage(@RequestParam("id") Long id, HttpServletResponse response) {
+        if(service.findPost(id).isEmpty()){
+            System.out.println("[ImageError] Wrong id(id: " + id + ")");
+            return;
+        }
+        String path = service.findImage(id);
+        Long numberOfImages = service.findPost(id).get().getNumberOfImages();
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/zip");
+        response.addHeader("Content-Disposition", "attachment; filename=\"image.zip\"");
+
+        FileOutputStream fos = null;
+
+        try {
+            ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
+
+            // File 객체를 List에 담는다.
+            List<File> fileList = new ArrayList<>();
+            for(int index=0; index<numberOfImages; index++){
+                fileList.add(new File(path + index + ".png"));
+            }
+
+            // 루프를 돌며 ZipOutputStream에 파일들을 계속 주입해준다.
+            for(File file : fileList) {
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                FileInputStream fileInputStream = new FileInputStream(file);
+
+                StreamUtils.copy(fileInputStream, zipOutputStream);
+
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
+            zipOutputStream.close();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }
 

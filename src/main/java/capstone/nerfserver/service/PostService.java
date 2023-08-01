@@ -21,6 +21,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final String scriptPath = "/workspace/test.sh";//~~.sh
     private final String videoPath = "/workspace/video/";
+    private final String imagePath = "/workspace/image/";
     private final String meshPath = "/workspace/result/mesh/";
 
     //글수정(구현x)
@@ -85,12 +86,38 @@ public class PostService {
         return meshPath + postId + "/";
     }
 
+    public String findImage(Long postId){
+        return imagePath + postId + "/";
+    }
+
     public void saveVideo(Long id, MultipartFile video) {
         if(!video.isEmpty()){ //empty인 경우 처리 필요?
             try {
                 video.transferTo(new File(videoPath + id + ".mp4"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void saveImages(Long id, MultipartFile[] images, Long numberOfImages) {
+        File folder = new File(imagePath + id);
+        if(!folder.exists()){
+            try{
+                folder.mkdir();
+            }
+            catch(Exception e){
+                e.getStackTrace();
+            }
+        }
+
+        for(int index=0; index<numberOfImages; index++){
+            if(!images[index].isEmpty()){ //불필요?
+                try {
+                    images[index].transferTo(new File(folder.getPath() + "/" + index + ".png"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

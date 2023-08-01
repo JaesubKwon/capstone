@@ -49,6 +49,17 @@ public class MemoryPostRepository implements PostRepository{
     }
 
     @Override
+    public Optional<Post> updateNumberOfImages(Long id, Long numberOfImages) {
+        Post post = store.get(id);
+        if(post == null){
+            return Optional.empty();
+        }
+        post.setNumberOfImages(numberOfImages);
+        return Optional.ofNullable(post);
+    }
+
+
+    @Override
     public Optional<Post> updateState(Long id, String state) {
         Post post = store.get(id);
         if(post == null){
