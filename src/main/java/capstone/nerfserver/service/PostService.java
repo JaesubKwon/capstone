@@ -1,7 +1,9 @@
 package capstone.nerfserver.service;
 
+import capstone.nerfserver.domain.MeshInfo;
 import capstone.nerfserver.domain.Post;
 import capstone.nerfserver.repository.MemoryPostRepository;
+import capstone.nerfserver.repository.MeshInfoRepository;
 import capstone.nerfserver.repository.PostRepository;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,11 +16,13 @@ import java.util.Optional;
 
 public class PostService {
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, MeshInfoRepository meshInfoRepository) {
         this.postRepository = postRepository;
+        this.meshInfoRepository = meshInfoRepository;
     }
 
     private final PostRepository postRepository;
+    private final MeshInfoRepository meshInfoRepository;
     private final String scriptPath = "/workspace/test.sh";//~~.sh
     private final String videoPath = "/workspace/video/";
     private final String imagePath = "/workspace/image/";
@@ -78,6 +82,15 @@ public class PostService {
     }
 
     /**
+     * MeshInfo 조회
+     * @param postId
+     * @return
+     */
+    public Optional<MeshInfo> findMeshInfo(Long postId){
+        return meshInfoRepository.findById(postId);
+    }
+
+    /**
      * mesh파일 주소 조회(폴더 주소)
      * @param postId
      * @return
@@ -88,6 +101,9 @@ public class PostService {
 
     public String findImage(Long postId){
         return imagePath + postId + "/";
+    }
+    public void saveMeshInfo(Long id, MeshInfo meshInfo){
+        meshInfoRepository.save(id, meshInfo);
     }
 
     public void saveVideo(Long id, MultipartFile video) {

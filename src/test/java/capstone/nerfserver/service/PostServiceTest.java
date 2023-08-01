@@ -1,23 +1,22 @@
 package capstone.nerfserver.service;
 
 import capstone.nerfserver.domain.Post;
+import capstone.nerfserver.repository.MemoryMeshInfoRepository;
 import capstone.nerfserver.repository.MemoryPostRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class PostServiceTest {
-    MemoryPostRepository repository = new MemoryPostRepository();
-    PostService service = new PostService(repository);
+    MemoryPostRepository postRepository = new MemoryPostRepository();
+    MemoryMeshInfoRepository meshInfoRepository = new MemoryMeshInfoRepository();
+    PostService service = new PostService(postRepository, meshInfoRepository);
 
     @AfterEach
     void afterEach(){
-        repository.clearStore();
+        postRepository.clearStore();
     }
 
     @Test
