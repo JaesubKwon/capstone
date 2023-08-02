@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +49,7 @@ public class NerfServerController {
     @ResponseBody
     public void finishNerf(@RequestParam("id") Long id) {
         Optional<Post> post = service.finishNerf(id);
-        post.ifPresentOrElse(p -> System.out.println("id: " + id + " NeRF " + p.getState()), () -> System.out.println("FinishNerfError Wrong id: " + id));
+        post.ifPresentOrElse(p -> printWithTimestamp("id: " + id + " NeRF " + p.getState()), () -> printWithTimestamp("FinishNerfError Wrong id: " + id));
     }
 
     @GetMapping("postList")
@@ -82,11 +84,11 @@ public class NerfServerController {
     public void getObj(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         printReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            System.out.println("[objError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[objError] Wrong id(id: " + id + ")");
             return;
         }
         if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            System.out.println("[objError] Status is \"waiting\"(id: " + id + ")");
+            printWithTimestamp("[objError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
         String path = service.findMesh(id);
@@ -101,11 +103,11 @@ public class NerfServerController {
     public void getMtl(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         printReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            System.out.println("[mtlError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[mtlError] Wrong id(id: " + id + ")");
             return;
         }
         if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            System.out.println("[mtlError] Status is \"waiting\"(id: " + id + ")");
+            printWithTimestamp("[mtlError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
         String path = service.findMesh(id);
@@ -120,11 +122,11 @@ public class NerfServerController {
     public void getPng(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         printReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            System.out.println("[pngError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[pngError] Wrong id(id: " + id + ")");
             return;
         }
         if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            System.out.println("[pngError] Status is \"waiting\"(id: " + id + ")");
+            printWithTimestamp("[pngError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
         String path = service.findMesh(id);
@@ -135,7 +137,7 @@ public class NerfServerController {
     }
 
     private void sendFile(HttpServletResponse response, File file) {
-        System.out.println("Start sending " + file.getName());
+        printWithTimestamp("Start sending " + file.getName());
         response.setHeader("Content-Disposition", "attachment;fileName=" + file.getName());
 
         try {
@@ -149,20 +151,20 @@ public class NerfServerController {
                 outputStream.flush();
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            printWithTimestamp(e.getMessage());
         }
-        System.out.println("Sent " + file.getName());
+        printWithTimestamp("Sent " + file.getName());
     }
     /*
     @GetMapping("mesh")
     @ResponseBody
     public void getMesh(@RequestParam("id") Long id, HttpServletResponse response) {
         if(service.findPost(id).isEmpty()){
-            System.out.println("[MeshError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[MeshError] Wrong id(id: " + id + ")");
             return;
         }
         if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            System.out.println("[MeshError] Status is \"waiting\"(id: " + id + ")");
+            printWithTimestamp("[MeshError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
         String path = service.findMesh(id);
@@ -196,7 +198,7 @@ public class NerfServerController {
             zipOutputStream.close();
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            printWithTimestamp(e.getMessage());
         }
     }
     */
@@ -206,11 +208,11 @@ public class NerfServerController {
     @ResponseBody
     public void getMesh(@RequestParam("id") Long id, HttpServletResponse response) {
         if(service.findPost(id).isEmpty()){
-            System.out.println("[MeshError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[MeshError] Wrong id(id: " + id + ")");
             return;
         }
         if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            System.out.println("[MeshError] Status is \"waiting\"(id: " + id + ")");
+            printWithTimestamp("[MeshError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
         String path = service.findMesh(id);
@@ -232,7 +234,7 @@ public class NerfServerController {
                 outputStream.flush();
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            printWithTimestamp(e.getMessage());
         }
     }
      */
@@ -242,7 +244,7 @@ public class NerfServerController {
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         printReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            System.out.println("[ImageError] Wrong id(id: " + id + ")");
+            printWithTimestamp("[ImageError] Wrong id(id: " + id + ")");
             return;
         }
         String path = service.findImage(id);
@@ -276,8 +278,15 @@ public class NerfServerController {
             zipOutputStream.close();
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            printWithTimestamp(e.getMessage());
         }
+    }
+
+    private static void printWithTimestamp(String string){
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss KST]");
+        System.out.print(now.format(formatter));
+        System.out.println(string);
     }
 
     private static void printReceivedRequest(HttpServletRequest request){
@@ -285,7 +294,7 @@ public class NerfServerController {
         if(request.getQueryString() != null){
             log += "?" + request.getQueryString();
         }
-        System.out.println(log);
+        printWithTimestamp(log);
     }
 }
 
