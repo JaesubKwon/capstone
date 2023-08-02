@@ -282,8 +282,8 @@ public class NerfServerController {
 
     private static void printWithTimestamp(String string){
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss]");
-        System.out.print(now.format(formatter));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        System.out.print("[" + now.format(formatter) + " KST]");
         System.out.println(string);
     }
 
