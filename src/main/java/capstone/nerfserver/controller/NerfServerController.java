@@ -87,7 +87,7 @@ public class NerfServerController {
             printWithTimestamp("[objError] Wrong id(id: " + id + ")");
             return;
         }
-        if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
+        if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
             printWithTimestamp("[objError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
@@ -106,7 +106,7 @@ public class NerfServerController {
             printWithTimestamp("[mtlError] Wrong id(id: " + id + ")");
             return;
         }
-        if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
+        if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
             printWithTimestamp("[mtlError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
@@ -125,7 +125,7 @@ public class NerfServerController {
             printWithTimestamp("[pngError] Wrong id(id: " + id + ")");
             return;
         }
-        if(service.findPost(id).get().getState() == "waiting"){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
+        if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
             printWithTimestamp("[pngError] Status is \"waiting\"(id: " + id + ")");
             return;
         }
@@ -254,8 +254,6 @@ public class NerfServerController {
         response.setContentType("application/zip");
         response.addHeader("Content-Disposition", "attachment; filename=\"image.zip\"");
 
-        FileOutputStream fos = null;
-
         try {
             ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
 
@@ -284,7 +282,7 @@ public class NerfServerController {
 
     private static void printWithTimestamp(String string){
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss KST]");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss]");
         System.out.print(now.format(formatter));
         System.out.println(string);
     }
