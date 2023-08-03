@@ -282,14 +282,18 @@ public class NerfServerController {
     }
 
     private static void printWithTimestamp(String string){
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_Bright_White = "\u001B[97m";
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        System.out.print("[" + now.format(formatter) + " KST]");
+        System.out.print(ANSI_Bright_White + "[" + now.format(formatter) + " KST]" + ANSI_RESET);
         System.out.println(string);
     }
 
     private static void printReceivedRequest(HttpServletRequest request){
-        String log = "[Received Request] " + request.getRequestURL();
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_Green = "\u001B[32m";
+        String log = ANSI_Green + "[Received Request] "+ ANSI_RESET + request.getRequestURL();
         if(request.getQueryString() != null){
             log += "?" + request.getQueryString();
         }
