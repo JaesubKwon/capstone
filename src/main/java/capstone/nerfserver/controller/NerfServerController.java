@@ -7,6 +7,8 @@ import capstone.nerfserver.repository.MemoryPostRepository;
 import capstone.nerfserver.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +30,14 @@ import java.util.zip.ZipOutputStream;
 public class NerfServerController {
 
     PostService service = new PostService(new MemoryPostRepository(), new MemoryMeshInfoRepository());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @PostMapping("upload")
     @ResponseBody
     public Post uploadPost(@RequestParam Long userId, @RequestParam String title, @RequestParam String content, @RequestParam Long price, @RequestParam Double xSize, @RequestParam Double ySize, @RequestParam Double zSize, @RequestParam MultipartFile video,
                            @RequestParam Long numberOfImages, @RequestParam MultipartFile image_1, @RequestParam MultipartFile image_2, @RequestParam MultipartFile image_3, @RequestParam MultipartFile image_4, @RequestParam MultipartFile image_5,
                            HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         Post post = new Post(userId, title, content, price, numberOfImages);
         service.upload(post);
         service.saveMeshInfo(post.getId(), new MeshInfo(xSize, ySize, zSize));
@@ -50,20 +53,20 @@ public class NerfServerController {
     @ResponseBody
     public void finishNerf(@RequestParam("id") Long id) {
         Optional<Post> post = service.finishNerf(id);
-        post.ifPresentOrElse(p -> printWithTimestamp("id: " + id + " NeRF " + p.getState()), () -> printWithTimestamp("FinishNerfError Wrong id: " + id));
+        post.ifPresentOrElse(p -> log.info("id: {} NeRF {}", id, p.getState()), () -> log.warn("[finishNerfError] Wrong id (id: {})", id));
     }
 
     @GetMapping("postList")
     @ResponseBody
     public List<Post> getPostList(HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         return service.allPosts();
     }
 
     @GetMapping("post")
     @ResponseBody
     public Post getPost(@RequestParam("id") Long id, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         return service.findPost(id).orElseGet(() -> {
             Post p = new Post();
             p.setTitle("Wrong ID");
@@ -74,7 +77,7 @@ public class NerfServerController {
     @GetMapping("meshInfo")
     @ResponseBody
     public MeshInfo getMeshInfo(@RequestParam("id") Long id, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         return service.findMeshInfo(id).orElseGet(() -> {
             return new MeshInfo(-1.0, -1.0, -1.0);
         }); //존재하지 않는 글이면 -1,-1,-1인 MeshInfo전송(헤더에 에러정보 담아보내도록 수정 필요)
@@ -83,13 +86,13 @@ public class NerfServerController {
     @GetMapping("obj")
     @ResponseBody
     public void getObj(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            printWithTimestamp("[objError] Wrong id(id: " + id + ")");
+            log.warn("[objError] Wrong id (id: {})", id);
             return;
         }
         if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            printWithTimestamp("[objError] Status is \"waiting\"(id: " + id + ")");
+            log.warn("[objError] Status is \"waiting\" (id: {})", id);
             return;
         }
         String path = service.findMesh(id);
@@ -102,13 +105,13 @@ public class NerfServerController {
     @GetMapping("mtl")
     @ResponseBody
     public void getMtl(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            printWithTimestamp("[mtlError] Wrong id(id: " + id + ")");
+            log.warn("[mtlError] Wrong id (id: {})", id);
             return;
         }
         if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            printWithTimestamp("[mtlError] Status is \"waiting\"(id: " + id + ")");
+            log.warn("[mtlError] Status is \"waiting\" (id: {})", id);
             return;
         }
         String path = service.findMesh(id);
@@ -121,13 +124,13 @@ public class NerfServerController {
     @GetMapping("png")
     @ResponseBody
     public void getPng(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            printWithTimestamp("[pngError] Wrong id(id: " + id + ")");
+            log.warn("[pngError] Wrong id (id: {})", id);
             return;
         }
         if(service.findPost(id).get().getState().equals("waiting")){  //waiting상태인 글의 mesh를 요청하면 body에 아무것도 없이 전송(즉 Content-Length가 0)
-            printWithTimestamp("[pngError] Status is \"waiting\"(id: " + id + ")");
+            log.warn("[pngError] Status is \"waiting\" (id: {})", id);
             return;
         }
         String path = service.findMesh(id);
@@ -138,7 +141,7 @@ public class NerfServerController {
     }
 
     private void sendFile(HttpServletResponse response, File file) {
-        printWithTimestamp("Start sending " + file.getName());
+        log.info("Start sending file '{}'", file.getName());
         response.setHeader("Content-Disposition", "attachment;fileName=" + file.getName());
 
         try {
@@ -152,9 +155,9 @@ public class NerfServerController {
                 outputStream.flush();
             }
         } catch (Exception e) {
-            printWithTimestamp(e.getMessage());
+            log.error(e.getMessage());
         }
-        printWithTimestamp("Sent " + file.getName());
+        log.info("Sent file '{}'", file.getName());
     }
     /*
     @GetMapping("mesh")
@@ -243,9 +246,9 @@ public class NerfServerController {
     @GetMapping("image")
     @ResponseBody
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
-        printReceivedRequest(request);
+        logReceivedRequest(request);
         if(service.findPost(id).isEmpty()){
-            printWithTimestamp("[ImageError] Wrong id(id: " + id + ")");
+            log.warn("[imageError] Wrong id (id: {})", id);
             return;
         }
         String path = service.findImage(id);
@@ -277,27 +280,16 @@ public class NerfServerController {
             zipOutputStream.close();
 
         } catch (Exception e) {
-            printWithTimestamp(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
-    private static void printWithTimestamp(String string){
-        String ANSI_RESET = "\u001B[0m";
-        String ANSI_Bright_White = "\u001B[97m";
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        System.out.print(ANSI_Bright_White + "[" + now.format(formatter) + " KST]" + ANSI_RESET);
-        System.out.println(string);
-    }
-
-    private static void printReceivedRequest(HttpServletRequest request){
-        String ANSI_RESET = "\u001B[0m";
-        String ANSI_Green = "\u001B[32m";
-        String log = ANSI_Green + "[Received Request] "+ ANSI_RESET + request.getRequestURL();
+    private void logReceivedRequest(HttpServletRequest request){
+        String requestString = request.getRequestURL().toString();
         if(request.getQueryString() != null){
-            log += "?" + request.getQueryString();
+             requestString += "?" + request.getQueryString();
         }
-        printWithTimestamp(log);
+        log.info("[Received Request] {}", requestString);
     }
 }
 
