@@ -51,7 +51,11 @@ public class NerfServerController {
 
     @GetMapping("finishNerf")
     @ResponseBody
-    public void finishNerf(@RequestParam("id") Long id) {
+    public void finishNerf(@RequestParam("id") Long id, HttpServletRequest request) {
+        if(!request.getRemoteAddr().equals("127.0.0.1")){  //only allow request from localhost(request from server itself)
+            log.warn("finishNerf request from '{}'" ,request.getRemoteAddr());
+            return;
+        }
         Optional<Post> post = service.finishNerf(id);
         post.ifPresentOrElse(p -> log.info("id: {} NeRF {}", id, p.getState()), () -> log.warn("[finishNerfError] Wrong id (id: {})", id));
     }
