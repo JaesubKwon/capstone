@@ -2,34 +2,30 @@ package capstone.nerfserver.controller;
 
 import capstone.nerfserver.domain.MeshInfo;
 import capstone.nerfserver.domain.Post;
-import capstone.nerfserver.repository.MemoryMeshInfoRepository;
-import capstone.nerfserver.repository.MemoryPostRepository;
 import capstone.nerfserver.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Controller
 public class NerfServerController {
+    @Autowired
+    PostService service;
 
-    PostService service = new PostService(new MemoryPostRepository(), new MemoryMeshInfoRepository());
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @PostMapping("upload")
@@ -40,7 +36,7 @@ public class NerfServerController {
         logReceivedRequest(request);
         Post post = new Post(userId, title, content, price, numberOfImages);
         service.upload(post);
-        service.saveMeshInfo(post.getId(), new MeshInfo(xSize, ySize, zSize));
+        service.saveMeshInfo(new MeshInfo(post.getId(), xSize, ySize, zSize));
         service.saveVideo(post.getId(), video);
         MultipartFile[] images = {image_1, image_2, image_3, image_4, image_5};
         service.saveImages(post.getId(), images, numberOfImages);
@@ -83,7 +79,7 @@ public class NerfServerController {
     public MeshInfo getMeshInfo(@RequestParam("id") Long id, HttpServletRequest request) {
         logReceivedRequest(request);
         return service.findMeshInfo(id).orElseGet(() -> {
-            return new MeshInfo(-1.0, -1.0, -1.0);
+            return new MeshInfo(-1L, -1.0, -1.0, -1.0);
         }); //존재하지 않는 글이면 -1,-1,-1인 MeshInfo전송(헤더에 에러정보 담아보내도록 수정 필요)
     }
 

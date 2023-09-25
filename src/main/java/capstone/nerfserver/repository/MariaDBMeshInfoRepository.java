@@ -1,12 +1,15 @@
 package capstone.nerfserver.repository;
 
 import capstone.nerfserver.domain.MeshInfo;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Optional;
 
-public interface MeshInfoRepository {
+@Mapper
+public interface MariaDBMeshInfoRepository extends MeshInfoRepository{
 
     void save(MeshInfo meshInfo);
-    void update(MeshInfo meshInfo);  //If id doesn't exist, return false. Or else return true
+    void update(MeshInfo meshInfo);
     Optional<MeshInfo> findById(Long id);
+    void clearStore();
 }

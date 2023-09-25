@@ -2,10 +2,12 @@ package capstone.nerfserver.service;
 
 import capstone.nerfserver.domain.MeshInfo;
 import capstone.nerfserver.domain.Post;
-import capstone.nerfserver.repository.MemoryPostRepository;
-import capstone.nerfserver.repository.MeshInfoRepository;
-import capstone.nerfserver.repository.PostRepository;
+import capstone.nerfserver.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,15 +16,15 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 
+
+@Service
+@RequiredArgsConstructor
+
 public class PostService {
 
-    public PostService(PostRepository postRepository, MeshInfoRepository meshInfoRepository) {
-        this.postRepository = postRepository;
-        this.meshInfoRepository = meshInfoRepository;
-    }
 
-    private final PostRepository postRepository;
-    private final MeshInfoRepository meshInfoRepository;
+    private final MariaDBPostRepository postRepository;
+    private final MariaDBMeshInfoRepository meshInfoRepository;
     private final String scriptPath = "/workspace/test.sh";//~~.sh
     private final String videoPath = "/workspace/video/";
     private final String imagePath = "/workspace/image/";
@@ -37,7 +39,8 @@ public class PostService {
      * @return
      */
     public Long upload(Post post){
-        return postRepository.save(post).getId();
+        postRepository.save(post);
+        return post.getId();
     }
 
     /**
@@ -61,7 +64,11 @@ public class PostService {
      * @return
      */
     public Optional<Post> finishNerf(Long id){
-        return postRepository.updateState(id, "done");
+        Optional<Post> post = postRepository.findById(id);
+        post.ifPresent(p ->{p.setState("done");
+            postRepository.update(p);});
+
+        return post;
     }
 
     /**
@@ -102,8 +109,8 @@ public class PostService {
     public String findImage(Long postId){
         return imagePath + postId + "/";
     }
-    public void saveMeshInfo(Long id, MeshInfo meshInfo){
-        meshInfoRepository.save(id, meshInfo);
+    public void saveMeshInfo(MeshInfo meshInfo){
+        meshInfoRepository.save(meshInfo);
     }
 
     public void saveVideo(Long id, MultipartFile video) {
@@ -136,6 +143,10 @@ public class PostService {
                 }
             }
         }
+    }
+
+    public void clearStore(){
+        postRepository.clearStore();
     }
 
 

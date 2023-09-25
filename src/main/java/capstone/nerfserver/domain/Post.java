@@ -6,18 +6,18 @@ import java.time.ZoneId;
 
 public class Post {
 
-    private long id;  //post id(given by server)
-    private long userId; //판매자 id
+    private Long id;  //post id(given by server)
+    private Long userId; //판매자 id
     private String title;
     private String content;
-    private long price;
+    private Long price;
     private LocalDateTime date;
     private Long numberOfImages;
     private String state;
 
     public Post() {
     }
-    public Post(long userId, String title, String content, long price, long numberOfImages) {
+    public Post(Long userId, String title, String content, Long price, Long numberOfImages) {
         this.userId = userId;
         this.title = title;
         this.content = content;
@@ -27,7 +27,7 @@ public class Post {
         this.state = "waiting";
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -35,7 +35,7 @@ public class Post {
         this.id = id;
     }
 
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
@@ -59,7 +59,7 @@ public class Post {
         this.content = content;
     }
 
-    public long getPrice() {
+    public Long getPrice() {
         return price;
     }
 
