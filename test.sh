@@ -2,6 +2,7 @@
 
 id=$1
 
+#process
 ns-process-data video --data /workspace/video/$id.mp4 --output-dir /workspace/result/data/$id
 
 #train
