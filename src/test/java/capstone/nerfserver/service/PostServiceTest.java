@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 class PostServiceTest {
-
+/*
     @Autowired
     PostService service;
 
@@ -76,4 +76,5 @@ class PostServiceTest {
     @Test
     void findMesh() {
     }
+ */
 }

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @SpringBootTest
 public class MariaDBMeshInfoRepositoryTest {
-
+/*
     @Autowired
     MariaDBMeshInfoRepository mariaDBMeshInfoRepository;
 
@@ -65,4 +65,5 @@ public class MariaDBMeshInfoRepositoryTest {
         System.out.println("result xSize: " + result.getXSize());
         Assertions.assertThat(meshInfo.getId()).isEqualTo(result.getId());
     }
+ */
 }

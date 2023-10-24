@@ -4,6 +4,8 @@ import capstone.nerfserver.domain.MeshInfo;
 import capstone.nerfserver.domain.Post;
 import capstone.nerfserver.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class PostService {
 
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final MariaDBPostRepository postRepository;
     private final MariaDBMeshInfoRepository meshInfoRepository;
     private final String scriptPath = "/workspace/test.sh";//~~.sh
@@ -50,10 +53,9 @@ public class PostService {
     public void runNerf(Long id){
         try {
             Runtime.getRuntime().exec(scriptPath + " " + id);
-            System.out.println("start running " + scriptPath + " " + id);
+            log.info("start running {} {}", scriptPath, id);
         } catch (IOException e) {
-            System.out.println("runNerf error");
-            System.out.println(e.getMessage());
+            log.info("runNerf error\n{}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -114,8 +116,18 @@ public class PostService {
     }
 
     public void saveVideo(Long id, MultipartFile video) {
-        if(!video.isEmpty()){ //empty인 경우 처리 필요?
+        if(!video.isEmpty()){
             try {
+                File folder = new File(videoPath);
+                if(!folder.exists()){
+                    try{
+                        folder.mkdir();
+                    }
+                    catch(Exception e){
+                        e.getStackTrace();
+                    }
+                }
+
                 video.transferTo(new File(videoPath + id + ".mp4"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -124,6 +136,17 @@ public class PostService {
     }
 
     public void saveImages(Long id, MultipartFile[] images, Long numberOfImages) {
+        File imageFolder = new File(imagePath);
+        if(!imageFolder.exists()){
+            try{
+                imageFolder.mkdir();
+            }
+            catch(Exception e){
+                e.getStackTrace();
+            }
+        }
+
+
         File folder = new File(imagePath + id);
         if(!folder.exists()){
             try{

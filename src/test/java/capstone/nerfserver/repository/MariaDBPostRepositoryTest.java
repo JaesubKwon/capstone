@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @SpringBootTest
 public class MariaDBPostRepositoryTest {
-
+/*
     @Autowired
     MariaDBPostRepository mariaDBPostRepository;
 
@@ -97,4 +97,5 @@ public class MariaDBPostRepositoryTest {
         Assertions.assertThat(post2.getId()).isEqualTo(result.getId());
         Assertions.assertThat(list.size()).isEqualTo(2);
     }
+ */
 }

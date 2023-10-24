@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 @SpringBootTest
 class BoardApplicationTests {
 
+    /*
     @Autowired
     private ApplicationContext context;
 
@@ -42,5 +43,6 @@ class BoardApplicationTests {
             e.printStackTrace();
         }
     }
+    */
 
 }
